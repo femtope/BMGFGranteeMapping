@@ -1,0 +1,86 @@
+<html>
+
+<head>
+
+<title> Testing </title>
+<link rel="stylesheet" href="jqueryui.min.css" type="text/css" />
+<link rel="stylesheet" href="jquery-ui-slider-pips.css" type="text/css" />
+<script src="jquery-ui.min.js"></script>
+<script src="jquery-ui-slider-pips.js"></script>
+<style>
+.ui-state-focus, 
+.ui-widget-content .ui-state-focus, 
+.ui-widget-header .ui-state-focus,
+.ui-state-hover,  
+.ui-widget-content .ui-state-hover, 
+.ui-widget-header .ui-state-hover,
+.ui-state-default, 
+.ui-widget-content .ui-state-default, 
+.ui-widget-header .ui-state-default {
+  background: #2b2b2b;
+  border-color: transparent;
+}
+                    
+.ui-slider .ui-slider-pip-initial-1 .ui-slider-label {
+  color: #E80949; }
+                    
+.ui-slider .ui-slider-pip-initial-2 .ui-slider-label {
+  color: #920AFF; }
+
+
+body {
+    
+    padding: 30px;
+    
+}
+</style>
+<script>
+$(function() {
+    
+    $("#pips-slider")
+    
+        .slider({
+        
+            range: true,
+            min: 1997,
+            max: 2015,
+            values: [ 1997, 2015 ],
+        	step: 1
+        
+        })
+    
+        .slider("pips", {
+        	
+        	first: "label",
+        	last: "label",
+            rest: "label",
+        	step: 1,
+        	labels: false,
+        	prefix: "",
+        	suffix: ""
+        
+        })
+    
+    	.slider("float", {
+        	
+        	handle: true,
+        	pips: false,
+        	labels: false,
+        	prefix: "",
+        	suffix: ""
+        
+    	});
+
+});
+</script>
+</head>
+
+<body>
+<div id="pips-slider">
+    
+</div>
+
+
+</body>
+
+</html>

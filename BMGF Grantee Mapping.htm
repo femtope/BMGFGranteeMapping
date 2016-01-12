@@ -1,0 +1,1122 @@
+<!DOCTYPE>
+<html>
+<head>
+<meta charset=utf-8 />
+<title>BMGF Grantee Mapping</title>
+  <link rel="stylesheet" href="cartodb.css" />
+  <script src="cartodb.js"></script>
+  <script src='jquery-1.11.0.min.js'></script>
+  
+   <link rel="stylesheet" type="text/css" href="styles.css" media="all" />
+    <link rel="stylesheet" href="iThing.css" type="text/css" />
+    <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/themes/css/cartodb.css" />
+    <link rel="stylesheet" href="http://asset.geosprocket.com/leaflet/cluster/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7/leaflet.css"/>
+    <link rel="stylesheet" href="MarkerCluster.css" />
+    <script src="markercluster-src.js"></script>
+    <script src="markercluster.js"></script>
+    <script src="http://asset.geosprocket.com/leaflet/cluster/leaflet.markercluster.js"></script>
+ 
+  <style>
+    html, body {width:100%; height:100%; padding: 0; margin: 0;}
+    #map { width: 100%; height:100%; background: grey;}
+    #menu { position: absolute; top: 15px; right: 400px; width: 500px; height:60px; background: transparent; z-index:10;}
+    #menu a { 
+      margin: 15px 10px 0 0;
+      float: right;
+      vertical-align: baseline;
+      width: 70px;
+      padding: 5px;
+      text-align: center;
+      font: bold 15px "Helvetica",Arial;
+      line-height: normal;
+      color: #555;
+      border-radius: 4px;
+      border: 1px solid #777777;
+      background: #ffffff;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    #menu a.selected { 
+      color: #F84F40;
+    }
+    
+
+	       	    #sector_title { position: absolute; top: 1px; right: -140px; width: 25px; height:14px; color: white; 
+        
+     
+
+      width: 70px;
+      padding: 5px;
+      text-align: center;
+      font: bold 12px "Helvetica",Arial;
+      line-height: normal;
+      color: white;
+   
+      border: 1px solid #777777;
+      background: black;
+      text-decoration: none;
+          
+    	    }	
+    	    
+    	  
+            
+	    #agric { position: absolute; top: 20px; right: -150px; width: 10px; height:15px; background: transparent; z-index:10;}
+	   #education { position: absolute; top: 60px; right: -150px; width: 10px; height:15px; background: transparent; z-index:10;}
+	   #finance { position: absolute; top: 100px; right: -150px; width: 10px; height:15px; background: transparent; z-index:10;}
+	   #health { position: absolute; top: 140px; right: -150px; width: 10px; height:15px; background: transparent; z-index:10;}
+	   #nutrition { position: absolute; top: 180px; right: -150px; width: 10px; height:15px; background: transparent; z-index:10;}
+	   #research { position: absolute; top: 220px; right: -150px; width: 10px; height:15px; background: transparent; z-index:10;}
+	   #alll{position: absolute; top: 135px; right: -290px; width: 10px; height:15px; background: transparent; z-index:10;}
+	  
+	   
+	   	    #project_title { position: absolute; right: -300px; top: 1px;  width: 30px;
+	   	    
+	   	    
+	   	    height:35px; color: white; 
+        
+     
+
+      width: 120px;
+      padding: 10px;
+      text-align: center;
+      font: bold 11px "Helvetica",Arial;
+      line-height: normal;
+      color: white;
+   
+      border: 1px solid #777777;
+      background: black;
+      text-decoration: none;
+	   	     
+	   	      }	   
+	   	    #national { position: absolute; top: 50px; right: -290px; width: 20px; height:15px; background: transparent; z-index:10;}
+	   #state { position: absolute; top: 90px; right: -290px; width: 20px; height:15px; background: transparent; z-index:10;}
+ 
+ 
+ #download { position: absolute; right: -290px;
+    top: 175px;  width: 60px;  
+	   	   
+	margin: 15px 10px 0 0;
+      float: right;
+      vertical-align: baseline;
+      width: 70px;
+      padding: 5px;
+      text-align: center;
+      font: bold 10px "Helvetica",Arial;
+      line-height: normal;
+      color: #555;
+      border-radius: 4px;
+      border: 1px solid #777777;
+      background: #ffffff;
+      text-decoration: none;
+      cursor: pointer;
+	   	   
+	   	   }
+      
+      
+  </style>
+  <script>
+  
+  
+  function init(){
+    // initiate leaflet map
+    map = new L.Map('map', { 
+      center: [10, 8],
+      zoom: 6
+    })
+
+    L.tileLayer('https://maps.nlp.nokia.com/maptiler/v2/maptile/newest/normal.day.grey/{z}/{x}/{y}/256/png8?lg=eng&token=61YWYROufLu_f8ylE0vn0Q&app_id=qIWDkliFCtLntLma2e6O', {
+      maxZoom: 15,
+      attribution: 'Mapbox <a href="http://mapbox.com/about/maps" target="_blank">Terms &amp; Feedback</a>'
+    }).addTo(map);
+
+
+	var sublayers = [];
+	
+	var queryJSON = "http://ehealthafrica.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT * FROM granteedata_copy WHERE sector = 'Agriculture'";
+	
+	var queryJSONScope = "http://ehealthafrica.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT * FROM granteedata_copy WHERE scope_of_work = 'State'";
+	
+	var queryJSONAll = "http://ehealthafrica.cartodb.com/api/v2/sql?format=GeoJSON&q=SELECT * FROM granteedata_copy";
+		
+	var sqlAgric = "SELECT cartodb_id, the_geom_webmercator, state, scope_of_work, duration, bmgf_point, amount_us, grantee_organisation, beneficiary, title_of_grant, nature_of_work, focal_state, longitude, latitude, sector, organisation FROM granteedata_copy WHERE sector = 'Agriculture'";
+	
+	
+	var sqlHealth = "SELECT cartodb_id, the_geom_webmercator, state, scope_of_work, duration, bmgf_point, amount_us, grantee_organisation, beneficiary, title_of_grant, nature_of_work, focal_state, longitude, latitude, sector, organisation FROM granteedata_copy WHERE sector = 'Health'";
+	
+	
+	
+	var sqlEducation = "SELECT cartodb_id, the_geom_webmercator, state, scope_of_work, duration, bmgf_point, amount_us, grantee_organisation, beneficiary, title_of_grant, nature_of_work, focal_state, longitude, latitude, sector, organisation FROM granteedata_copy WHERE sector = 'Education'";
+	
+		
+	var sqlFinance = "SELECT cartodb_id, the_geom_webmercator, state, scope_of_work, duration, bmgf_point, amount_us, grantee_organisation, beneficiary, title_of_grant, nature_of_work, focal_state, longitude, latitude, sector, organisation FROM granteedata_copy WHERE sector = 'Finance'";
+	
+	
+	
+	var sqlNutrition = "SELECT cartodb_id, the_geom_webmercator, state, scope_of_work, duration, bmgf_point, amount_us, grantee_organisation, beneficiary, title_of_grant, nature_of_work, focal_state, longitude, latitude, sector, organisation FROM granteedata_copy WHERE sector = 'Nutrition'";
+	
+	
+		
+	var sqlResearch = "SELECT cartodb_id, the_geom_webmercator, state, scope_of_work, duration, bmgf_point, amount_us, grantee_organisation, beneficiary, title_of_grant, nature_of_work, focal_state, longitude, latitude, sector, organisation FROM granteedata_copy WHERE sector = 'Research'";
+	
+	
+		
+	var sqlState = "SELECT the_geom_webmercator, amount_us, beneficiary, bmgf_point, duration, focal_state, grantee_organisation, nature_of_work, organisation, scope_of_work, sector, state, title_of_grant FROM granteedata_copy where scope_of_work = 'State'";
+	
+	var sqlNational = "SELECT the_geom_webmercator, amount_us, beneficiary, bmgf_point, duration, focal_state, grantee_organisation, nature_of_work, organisation, scope_of_work, sector, state, title_of_grant FROM granteedata_copy WHERE scope_of_work = 'National'";
+	
+	var sqlAll = "SELECT the_geom_webmercator, amount_us, beneficiary, bmgf_point, duration, focal_state, grantee_organisation, nature_of_work, organisation, scope_of_work, sector, state, title_of_grant FROM granteedata_copy";
+	
+	var queryAgric = sqlAgric;
+	var queryHealth = sqlHealth;
+	var queryEducation = sqlEducation;
+	var queryFinance = sqlFinance;
+	var queryNutrition = sqlNutrition;
+	var queryResearch = sqlResearch;
+	var queryState = sqlState;
+	var queryNational = sqlNational;
+	var queryAll = sqlAll;
+	
+	
+	
+	
+
+	
+  // create district selector
+  function createSelectorDistrict(layer) {
+	var sql = new cartodb.SQL({ user: 'ehealthafrica' });
+	var $options = $('#layer_selector');
+
+	
+	$options.change(function(e) {
+
+	  // get the area of the selected layer
+	  var $li = $(e.target);
+	  var area = $('#layer_selector').find(":selected").val();
+
+      
+	  // deselect all and select the clicked one
+	  $options.removeClass('selected');
+	  $li.addClass('selected');
+	  // create query based on data from the layer
+
+	
+		
+	});
+
+}  
+  
+  // create choropleth selector
+  function createSelectorChoropleth(layer) {
+	var $options = $('#choropleth_selector li');
+	$options.click(function(e) {
+		  // get the choropleth type
+		  var $li = $(e.target);
+		  var type = $li.attr('data');
+		  // deselect all and select the clicked one
+		  $options.removeClass('selected');
+		  $li.addClass('selected');
+		  // create query based on data from the layer
+		  if(type == 'calls') {
+			layer.set({cartocss: ""
+			})
+		  };
+		  if(type == 'population') {
+			layer.set({cartocss: ""
+			})
+		  };
+		});
+  }
+
+	// create array with the layers
+  var layerSource = {
+	user_name: 'ehealthafrica',
+	type: 'cartodb',
+	sublayers: [{
+	  sql: sqlAgric,
+	  cartocss: "#granteedata_copy[sector = 'Agriculture'] { marker-fill: #006400; marker-width: 15; marker-line-color: #FFFFFF; marker-line-width: 1; marker-fill-opacity: 2;}"
+    },
+    
+    {
+	  sql: sqlEducation,
+	  cartocss: "#granteedata_copy[sector = 'Education'] { marker-fill: #0000FF; marker-width: 15; marker-line-color: #FFFFFF; marker-line-width: 1; marker-fill-opacity: 2;}"
+   },
+    
+    
+    {
+	  sql: sqlFinance,
+	  cartocss: "#granteedata_copy[sector = 'Finance'] { marker-fill: #FF8C00; marker-width: 15; marker-line-color: #FFFFFF; marker-line-width: 1; marker-fill-opacity: 2;}"
+   },
+   
+   {
+	  sql: sqlHealth,
+	  cartocss: "#granteedata_copy[sector = 'Health'] { marker-fill: #87CEEB; marker-width: 15; marker-line-color: #FFFFFF; marker-line-width: 1; marker-fill-opacity: 2;}"
+   },
+   
+     {
+	  sql: sqlNutrition,
+	  cartocss: "#granteedata_copy[sector = 'Nutrition'] { marker-fill: #FFFF00; marker-width: 15; marker-line-color: #FFFFFF; marker-line-width: 1; marker-fill-opacity: 2;}"
+   },
+   
+   {
+	  sql: sqlResearch,
+	  cartocss: "#granteedata_copy[sector = 'Research'] { marker-fill: #8B4513; marker-width: 15; marker-line-color: #FFFFFF; marker-line-width: 1; marker-fill-opacity: 2;}"
+   },
+     
+   
+   
+    {
+   sql: sqlState,
+	  cartocss: "#granteedata_copy[scope_of_work = 'State'] { marker-fill: #FF0000; marker-width: 15; marker-line-color: #FFFFFF; marker-line-width: 1; marker-fill-opacity: 2;}"
+   },  
+   
+   {
+   sql: sqlNational,
+	  cartocss: "#granteedata_copy[scope_of_work = 'National'] { marker-fill: #000000; marker-width: 15; marker-line-color: #FFFFFF; marker-line-width: 1; marker-fill-opacity: 2;}"
+   },  
+   
+       
+   {
+	  sql: "SELECT * FROM state_boundary_copy",
+	  cartocss: "#state_boundary_copy{polygon-fill: #C0C0C0; polygon-opacity: 0.5; line-color: #900000; line-width: 2.0; line-opacity: 2;}"
+	},
+	
+	 {
+   sql: sqlAll,
+	  cartocss: "#granteedata_copy{ marker-fill: #009900; marker-width: 15; marker-line-color: #FFFFFF; marker-line-width: 1; marker-fill-opacity: 2;}"
+   }
+]
+	}
+	
+	
+		  
+	cartodb.createLayer(map, layerSource)
+	  .addTo(map)
+	  .on('done', function(layer) {
+		
+		for (var i = 0; i < layer.getSubLayerCount(); i++) {
+            sublayers[i] = layer.getSubLayer(i);
+			//alert("Congrats, you added sublayer #" + i + "!");
+		}
+		
+		createSelectorDistrict(sublayers[0]);
+		
+		createSelectorChoropleth(sublayers[0]);
+		
+	  	    sublayers[0].hide();
+            sublayers[1].hide();
+	  		sublayers[2].hide();
+	  		sublayers[3].hide();
+	  		sublayers[4].hide();
+	  		sublayers[5].hide();
+	  		sublayers[6].hide();
+	  		sublayers[7].hide();
+	  	//	sublayers[9].hide();
+	
+
+		cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(0), [  'sector', 'state', 'scope_of_work', 'duration', 'bmgf_point', 'amount_us', 'grantee_organisation', 'beneficiary', 'title_of_grant', 'nature_of_work', 'focal_state',  'organisation'])	
+
+
+		cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(1), [ 'sector', 'state', 'scope_of_work', 'duration', 'bmgf_point', 'amount_us', 'grantee_organisation', 'beneficiary', 'title_of_grant', 'nature_of_work', 'focal_state', 'organisation'])	
+
+		cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(2), [ 'sector', 'state', 'scope_of_work', 'duration', 'bmgf_point', 'amount_us', 'grantee_organisation', 'beneficiary', 'title_of_grant', 'nature_of_work', 'focal_state', 'organisation' ])	
+        
+        cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(3), [  'sector', 'state', 'scope_of_work', 'duration', 'bmgf_point', 'amount_us', 'grantee_organisation', 'beneficiary', 'title_of_grant', 'nature_of_work', 'focal_state', 'organisation'])	
+
+
+		cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(4), [ 'sector', 'state', 'scope_of_work', 'duration', 'bmgf_point', 'amount_us', 'grantee_organisation', 'beneficiary', 'title_of_grant', 'nature_of_work', 'focal_state', 'organisation'])	
+
+		cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(5), [ 'sector', 'state', 'scope_of_work', 'duration', 'bmgf_point', 'amount_us', 'grantee_organisation', 'beneficiary', 'title_of_grant', 'nature_of_work', 'focal_state',  'organisation' ])	
+        
+        cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(6), [  'scope_of_work', 'state', 'duration', 'bmgf_point', 'amount_us', 'grantee_organisation', 'beneficiary', 'title_of_grant', 'nature_of_work', 'focal_state', 'sector', 'organisation'])	
+        
+        cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(7), [  'scope_of_work',  'state', 'duration', 'bmgf_point', 'amount_us', 'grantee_organisation', 'beneficiary', 'title_of_grant', 'nature_of_work', 'focal_state', 'sector', 'organisation'])
+        
+        cdb.vis.Vis.addInfowindow(map, layer.getSubLayer(9), [  'sector', 'state', 'scope_of_work', 'duration', 'bmgf_point', 'amount_us', 'grantee_organisation', 'beneficiary', 'title_of_grant', 'nature_of_work', 'focal_state', 'organisation'])
+        
+		;
+		// creating legends and add legend to map
+		var legendIncrease = new cdb.geo.ui.Legend({
+           type: "choropleth",
+           data: [
+           ]
+		});	
+		var stackedLegend = new cdb.geo.ui.StackedLegend({
+           legends: [legendCallType,legendCallType_bound]
+         }); 
+        $('#map').append(stackedLegend.render().el);
+		
+	  }).on('error', function() {
+		//log the error
+	  });
+	 
+
+
+        var mAgric, mEdu, mFin, mHea, mNut, mRes, mSta, mNat, mAll;
+        var geojsonAgric, geojsonEdu, geojsonHea, geojsonFin, geojsonNut, geojsonRes, geojsonSta, geojsonNat, geojsonAll;
+
+	//Create call type selector
+	var LayerActions = {
+
+	
+        agric: function(){
+        
+              			
+  			sublayers[0].setSQL(queryAgric);
+  			console.log(queryAgric);
+	  		sublayers[0].toggle();
+	  		sublayers[1].hide();
+	  		sublayers[2].hide();
+	  		sublayers[3].hide();
+	  		sublayers[4].hide();
+	  		sublayers[5].hide();
+	  		sublayers[6].hide();
+	  		sublayers[7].hide();
+	  		sublayers[9].hide();
+	  		$('.button.education').removeClass('selected');	
+	  		$('.button.finance').removeClass('selected');
+	  		$('.button.health').removeClass('selected');
+	  		$('.button.nutrition').removeClass('selected');
+	  		$('.button.research').removeClass('selected');
+	  		$('.button.state').removeClass('selected');
+	  		$('.button.national').removeClass('selected');
+	  		$('.button.alll').removeClass('selected');
+	  		
+	  		
+	  		var query = queryJSON;
+	  		query = query.replace('Agriculture','Agriculture');
+            mAgric = new L.markerClusterGroup({
+            disableClusteringAtZoom:10,
+            showCoverageOnHover:false,
+            spiderfyOnMaxZoom:false, 
+            spiderLegPolylineOptions:{
+                weight:0, color:'#999', opacity:1
+                },
+            zoomToBoundsOnClick:true,
+            removeOutsideVisibleBounds:true
+            });
+           
+            console.log(query);
+           	$.getJSON(query, function(data){
+            
+            geojsonAgric = L.geoJson(data, {
+            onEachFeature: function(feature, layer) {
+            
+            }
+            });
+
+            mAgric.addLayer(geojsonAgric);       
+            mAgric.addTo(map);
+           	map._layersMaxZoom = 14
+
+            
+            map.on('zoomend', function(){
+            if (map.getZoom() > 9 && map.hasLayer(mAgric)){
+                map.removeLayer(mAgric);
+            }
+            if (map.getZoom() < 9 &&  map.hasLayer(mAgric)== false){
+                map.addLayer(mAgric);
+            }
+            });
+            
+            mEdu.removeLayer(geojsonEdu);
+           	mFin.removeLayer(geojsonFin);
+            mHea.removeLayer(geojsonHea);
+            mNut.removeLayer(geojsonNut);
+            mRes.removeLayer(geojsonRes);
+           	mSta.removeLayer(geojsonSta);
+           	mNat.removeLayer(geojsonNat);
+           	mAll.removeLayer(geojsonAll);
+
+            
+            
+            
+            });  
+            
+        
+            
+	  },
+        
+        education: function(){
+        
+  			console.log(query);
+	  		sublayers[1].setSQL(queryEducation);
+	  		sublayers[1].toggle();
+	  		sublayers[0].hide();
+	  		sublayers[2].hide();
+	  		sublayers[3].hide();
+	  		sublayers[4].hide();
+	  		sublayers[5].hide();
+	  		sublayers[6].hide();
+	  		sublayers[7].hide();
+	  		sublayers[9].hide();
+	  		$('.button.agric').removeClass('selected');	
+	  		$('.button.finance').removeClass('selected');
+	  		$('.button.health').removeClass('selected');
+	  		$('.button.nutrition').removeClass('selected');
+	  		$('.button.research').removeClass('selected');
+	  		$('.button.state').removeClass('selected');
+	  		$('.button.national').removeClass('selected');
+	  		$('.button.all').removeClass('selected');
+	  		
+  			var query = queryJSON;
+			query = query.replace('Agriculture','Education');
+            mEdu = new L.markerClusterGroup({
+            disableClusteringAtZoom:10,
+            showCoverageOnHover:false,
+            spiderfyOnMaxZoom:false, 
+            spiderLegPolylineOptions:{
+                weight:0, color:'#999', opacity:1
+                },
+            zoomToBoundsOnClick:true,
+            removeOutsideVisibleBounds:true
+            });
+           
+            console.log(query);
+           	$.getJSON(query, function(data){
+            
+            geojsonEdu = L.geoJson(data, {
+            onEachFeature: function(feature, layer) {
+            
+            }
+            });
+
+            mEdu.addLayer(geojsonEdu);       
+            mEdu.addTo(map);
+           	map._layersMaxZoom = 14
+
+            
+            map.on('zoomend', function(){
+            if (map.getZoom() > 9 && map.hasLayer(mEdu)){
+                map.removeLayer(mEdu);
+            }
+            if (map.getZoom() < 9 &&  map.hasLayer(mEdu)== false){
+                map.addLayer(mEdu);
+            }
+            });
+            
+            mAgric.removeLayer(geojsonAgric);
+           	mFin.removeLayer(geojsonFin);
+            mHea.removeLayer(geojsonHea);
+            mNut.removeLayer(geojsonNut);
+            mRes.removeLayer(geojsonRes);
+           	mSta.removeLayer(geojsonSta);
+           	mNat.removeLayer(geojsonNat);
+           	mAll.removeLayer(geojsonAll);
+
+            });  
+            
+	  },
+	  
+	  
+	  finance: function(){
+ 
+            console.log(queryFinance);
+	  		sublayers[2].setSQL(queryFinance);
+	  		sublayers[2].toggle();
+	  		sublayers[0].hide();
+	  		sublayers[1].hide();
+	  		sublayers[3].hide();
+	  		sublayers[4].hide();
+	  		sublayers[5].hide();
+	  		sublayers[6].hide();
+	  		sublayers[7].hide();
+	  		sublayers[9].hide();
+	  		$('.button.agric').removeClass('selected');	
+	  		$('.button.education').removeClass('selected');
+	  		$('.button.health').removeClass('selected');
+	  		$('.button.nutrition').removeClass('selected');
+	  		$('.button.research').removeClass('selected');
+	  		$('.button.state').removeClass('selected');
+	  		$('.button.national').removeClass('selected');
+	  		$('.button.alll').removeClass('selected');
+	  		
+	  		
+	        var query = queryJSON;
+			query = query.replace('Agriculture','Finance');
+            mFin = new L.markerClusterGroup({
+            disableClusteringAtZoom:10,
+            showCoverageOnHover:false,
+            spiderfyOnMaxZoom:false, 
+            spiderLegPolylineOptions:{
+                weight:0, color:'#999', opacity:1
+                },
+            zoomToBoundsOnClick:true,
+            removeOutsideVisibleBounds:true
+            });
+           
+            console.log(query);
+           	$.getJSON(query, function(data){
+            
+            geojsonFin = L.geoJson(data, {
+            onEachFeature: function(feature, layer) {
+            
+            }
+            });
+
+            mFin.addLayer(geojsonFin);       
+            mFin.addTo(map);
+           	map._layersMaxZoom = 14
+
+            
+            map.on('zoomend', function(){
+            if (map.getZoom() > 4 && map.hasLayer(mFin)){
+                map.removeLayer(mFin);
+            }
+            if (map.getZoom() <= 4 &&  map.hasLayer(mFin)== false){
+                map.addLayer(mFin);
+            }
+            });
+            
+            mAgric.removeLayer(geojsonAgric);
+           	mEdu.removeLayer(geojsonEdu);
+            mHea.removeLayer(geojsonHea);
+            mNut.removeLayer(geojsonNut);
+            mRes.removeLayer(geojsonRes);
+           	mSta.removeLayer(geojsonSta);
+           	mNat.removeLayer(geojsonNat);
+           	mAll.removeLayer(geojsonAll);
+
+            });  
+            
+            
+	  },
+	  
+	  health: function(){
+
+  			console.log(queryHealth);
+	  		sublayers[3].setSQL(queryHealth);
+	  		sublayers[3].toggle();
+	  		sublayers[0].hide();
+	  		sublayers[1].hide();
+	  		sublayers[2].hide();
+	  		sublayers[4].hide();
+	  		sublayers[5].hide();
+	  		sublayers[6].hide();
+	  		sublayers[7].hide();
+	  		sublayers[9].hide();
+	  		$('.button.agric').removeClass('selected');	
+	  		$('.button.education').removeClass('selected');
+	  		$('.button.finance').removeClass('selected');
+	  		$('.button.nutrition').removeClass('selected');
+	  		$('.button.research').removeClass('selected');
+	  		$('.button.state').removeClass('selected');
+	  		$('.button.national').removeClass('selected');
+	  		$('.button.alll').removeClass('selected');
+	  		
+			var query = queryJSON;
+			query = query.replace('Agriculture','Health');
+            mHea = new L.markerClusterGroup({
+            disableClusteringAtZoom:10,
+            showCoverageOnHover:false,
+            spiderfyOnMaxZoom:false, 
+            spiderLegPolylineOptions:{
+                weight:0, color:'#999', opacity:1
+                },
+            zoomToBoundsOnClick:true,
+            removeOutsideVisibleBounds:true
+            });
+           
+            console.log(query);
+           	$.getJSON(query, function(data){
+            
+            geojsonHea = L.geoJson(data, {
+            onEachFeature: function(feature, layer) {
+            
+            }
+            });
+
+            mHea.addLayer(geojsonHea);       
+            mHea.addTo(map);
+           	map._layersMaxZoom = 14
+
+            
+            map.on('zoomend', function(){
+            if (map.getZoom() > 9 && map.hasLayer(mHea)){
+                map.removeLayer(mHea);
+            }
+            if (map.getZoom() < 9 &&  map.hasLayer(mHea)== false){
+                map.addLayer(mHea);
+            }
+            });
+            
+            mAgric.removeLayer(geojsonAgric);
+           	mEdu.removeLayer(geojsonEdu);
+            mFin.removeLayer(geojsonFin);
+            mNut.removeLayer(geojsonNut);
+            mRes.removeLayer(geojsonRes);
+           	mSta.removeLayer(geojsonSta);
+           	mNat.removeLayer(geojsonNat);
+           	mAll.removeLayer(geojsonAll);
+
+            }); 
+	  		
+	  },
+	  
+	  nutrition: function(){
+
+  			console.log(queryNutrition);
+	  		sublayers[4].setSQL(queryNutrition);
+	  		sublayers[4].toggle();
+	  		sublayers[0].hide();
+	  		sublayers[1].hide();
+	  		sublayers[2].hide();
+	  		sublayers[3].hide();
+	  		sublayers[5].hide();
+	  		sublayers[6].hide();
+	  		sublayers[7].hide();
+	  		sublayers[9].hide();
+	  		$('.button.agric').removeClass('selected');	
+	  		$('.button.education').removeClass('selected');
+	  		$('.button.finance').removeClass('selected');
+	  		$('.button.health').removeClass('selected');
+	  		$('.button.research').removeClass('selected');
+	  		$('.button.state').removeClass('selected');
+	  		$('.button.national').removeClass('selected');
+	  		$('.button.alll').removeClass('selected');
+	  		
+            var query = queryJSON;
+			query = query.replace('Agriculture','Nutrition');
+            mNut = new L.markerClusterGroup({
+            disableClusteringAtZoom:10,
+            showCoverageOnHover:false,
+            spiderfyOnMaxZoom:false, 
+            spiderLegPolylineOptions:{
+                weight:0, color:'#999', opacity:1
+                },
+            zoomToBoundsOnClick:true,
+            removeOutsideVisibleBounds:true
+            });
+           
+            console.log(query);
+           	$.getJSON(query, function(data){
+            
+            geojsonNut = L.geoJson(data, {
+            onEachFeature: function(feature, layer) {
+            
+            }
+            });
+
+            mNut.addLayer(geojsonNut);       
+            mNut.addTo(map);
+           	map._layersMaxZoom = 14
+
+            
+            map.on('zoomend', function(){
+            if (map.getZoom() > 9 && map.hasLayer(mNut)){
+                map.removeLayer(mNut);
+            }
+            if (map.getZoom() < 9 &&  map.hasLayer(mNut)== false){
+                map.addLayer(mNut);
+            }
+            });
+            
+            mAgric.removeLayer(geojsonAgric);
+           	mEdu.removeLayer(geojsonEdu);
+            mFin.removeLayer(geojsonFin);
+            mHea.removeLayer(geojsonHea);
+            mRes.removeLayer(geojsonRes);
+           	mSta.removeLayer(geojsonSta);
+           	mNat.removeLayer(geojsonNat);
+           	mAll.removeLayer(geojsonAll);
+
+            });  
+            
+		
+	  },
+	  
+	  
+	  research: function(){
+
+  			console.log(queryResearch);
+	  		sublayers[5].setSQL(queryResearch);
+	  		sublayers[5].toggle();
+	  		sublayers[0].hide();
+	  		sublayers[1].hide();
+	  		sublayers[2].hide();
+	  		sublayers[3].hide();
+	  		sublayers[4].hide();
+	  		sublayers[6].hide();
+	  		sublayers[7].hide();
+	  		sublayers[9].hide();
+	  		$('.button.agric').removeClass('selected');	
+	  		$('.button.education').removeClass('selected');
+	  		$('.button.finance').removeClass('selected');
+	  		$('.button.health').removeClass('selected');
+	  		$('.button.research').removeClass('selected');
+	  		$('.button.state').removeClass('selected');
+	  		$('.button.national').removeClass('selected');
+	  		$('.button.alll').removeClass('selected');
+	  		
+            var query = queryJSON;
+			query = query.replace('Agriculture','Research');
+            mRes = new L.markerClusterGroup({
+            disableClusteringAtZoom:10,
+            showCoverageOnHover:false,
+            spiderfyOnMaxZoom:false, 
+            spiderLegPolylineOptions:{
+                weight:0, color:'#999', opacity:1
+                },
+            zoomToBoundsOnClick:true,
+            removeOutsideVisibleBounds:true
+            });
+           
+            console.log(query);
+           	$.getJSON(query, function(data){
+            
+            geojsonRes = L.geoJson(data, {
+            onEachFeature: function(feature, layer) {
+            
+            }
+            });
+
+            mRes.addLayer(geojsonRes);       
+            mRes.addTo(map);
+           	map._layersMaxZoom = 14
+
+            
+            map.on('zoomend', function(){
+            if (map.getZoom() > 5 && map.hasLayer(mRes)){
+                map.removeLayer(mRes);
+            }
+            if (map.getZoom() <= 5 &&  map.hasLayer(mRes)== false){
+                map.addLayer(mRes);
+            }
+            });
+            
+            mAgric.removeLayer(geojsonAgric);
+           	mEdu.removeLayer(geojsonEdu);
+            mFin.removeLayer(geojsonFin);
+            mHea.removeLayer(geojsonHea);
+            mNut.removeLayer(geojsonNut);
+           	mSta.removeLayer(geojsonSta);
+           	mNat.removeLayer(geojsonNat);
+           	mAll.removeLayer(geojsonAll);
+
+            });  
+            
+	  },
+	  
+	  
+	  state: function(){
+            console.log(queryState);
+	  		sublayers[6].setSQL(queryState);
+	  		sublayers[6].toggle();
+	  		sublayers[0].hide();
+	  		sublayers[1].hide();
+	  		sublayers[2].hide();
+	  		sublayers[4].hide();
+	  		sublayers[5].hide();
+	  		sublayers[3].hide();
+	  		sublayers[7].hide();
+	  		sublayers[9].hide();
+	  		
+	  		$('.button.agric').removeClass('selected');	
+	  		$('.button.education').removeClass('selected');
+	  		$('.button.finance').removeClass('selected');
+	  		$('.button.nutrition').removeClass('selected');
+	  		$('.button.research').removeClass('selected');
+	  		$('.button.national').removeClass('selected');
+	  		$('.button.health').removeClass('selected');
+            $('.button.alll').removeClass('selected');
+	  		
+            var queryScope = queryJSONScope;
+			queryScope = queryScope.replace('State','State');
+            mSta = new L.markerClusterGroup({
+            disableClusteringAtZoom:10,
+            showCoverageOnHover:false,
+            spiderfyOnMaxZoom:false, 
+            spiderLegPolylineOptions:{
+                weight:0, color:'#999', opacity:1
+                },
+            zoomToBoundsOnClick:true,
+            removeOutsideVisibleBounds:true
+            });
+           
+            console.log(queryScope);
+           	$.getJSON(queryScope, function(data){
+            
+            geojsonSta = L.geoJson(data, {
+            onEachFeature: function(feature, layer) {
+            
+            }
+            });
+
+            mSta.addLayer(geojsonSta);       
+            mSta.addTo(map);
+           	map._layersMaxZoom = 15
+
+            
+            map.on('zoomend', function(){
+            if (map.getZoom() > 6 && map.hasLayer(mSta)){
+                map.removeLayer(mSta);
+            }
+            if (map.getZoom() <= 6 &&  map.hasLayer(mSta)== false){
+                map.addLayer(mSta);
+            }
+            });
+            
+            mAgric.removeLayer(geojsonAgric);
+           	mEdu.removeLayer(geojsonEdu);
+            mFin.removeLayer(geojsonFin);
+            mHea.removeLayer(geojsonHea);
+            mNut.removeLayer(geojsonNut);
+           	mRes.removeLayer(geojsonRes);
+           	mNat.removeLayer(geojsonNat);
+           	mAll.removeLayer(geojsonAll);
+
+            });  
+            
+	  		
+	  }, 
+	  
+	  national: function(){
+  			console.log(queryNational);
+	  		sublayers[7].setSQL(queryNational);
+	  		sublayers[7].toggle();
+	  		sublayers[0].hide();
+	  		sublayers[1].hide();
+	  		sublayers[2].hide();
+	  		sublayers[4].hide();
+	  		sublayers[5].hide();
+	  		sublayers[3].hide();
+	  		sublayers[6].hide();
+	  		sublayers[9].hide();
+	  		$('.button.agric').removeClass('selected');	
+	  		$('.button.education').removeClass('selected');
+	  		$('.button.finance').removeClass('selected');
+	  		$('.button.nutrition').removeClass('selected');
+	  		$('.button.research').removeClass('selected');
+	  		$('.button.state').removeClass('selected');
+	  		$('.button.health').removeClass('selected');
+	  		$('.button.alll').removeClass('selected');
+	  		
+            var queryScope = queryJSONScope;
+			queryScope = queryScope.replace('State','National');
+            mNat = new L.markerClusterGroup({
+            disableClusteringAtZoom:10,
+            showCoverageOnHover:false,
+            spiderfyOnMaxZoom:false, 
+            spiderLegPolylineOptions:{
+                weight:0, color:'#999', opacity:1
+                },
+            zoomToBoundsOnClick:true,
+            removeOutsideVisibleBounds:true
+            });
+           
+            console.log(queryScope);
+           	$.getJSON(queryScope, function(data){
+            
+            geojsonNat = L.geoJson(data, {
+            onEachFeature: function(feature, layer) {
+            
+            }
+            });
+
+            mNat.addLayer(geojsonNat);       
+            mNat.addTo(map);
+           	map._layersMaxZoom = 17
+
+            
+            map.on('zoomend', function(){
+            if (map.getZoom() > 8 && map.hasLayer(mNat)){
+                map.removeLayer(mNat);
+            }
+            if (map.getZoom() <= 8 &&  map.hasLayer(mNat)== false){
+                map.addLayer(mNat);
+            }
+            });
+            
+            mAgric.removeLayer(geojsonAgric);
+           	mEdu.removeLayer(geojsonEdu);
+            mFin.removeLayer(geojsonFin);
+            mHea.removeLayer(geojsonHea);
+            mNut.removeLayer(geojsonNut);
+           	mRes.removeLayer(geojsonRes);
+           	mSta.removeLayer(geojsonSta);
+           	mAll.removeLayer(geojsonAll);
+
+            });
+	  },
+	  
+	  	  alll: function(){
+  			console.log(queryNational);
+	  		sublayers[9].setSQL(queryNational);
+	  		sublayers[9].toggle();
+	  		sublayers[0].hide();
+	  		sublayers[1].hide();
+	  		sublayers[2].hide();
+	  		sublayers[4].hide();
+	  		sublayers[5].hide();
+	  		sublayers[3].hide();
+	  		sublayers[6].hide();
+	  		sublayers[7].hide();
+	  		$('.button.agric').removeClass('selected');	
+	  		$('.button.education').removeClass('selected');
+	  		$('.button.finance').removeClass('selected');
+	  		$('.button.nutrition').removeClass('selected');
+	  		$('.button.research').removeClass('selected');
+	  		$('.button.state').removeClass('selected');
+	  		$('.button.health').removeClass('selected');
+	  		$('.button.national').removeClass('selected');
+	  		
+            var query = queryJSONAll;
+			//queryScope = queryScope.replace('State','National');
+            mAll = new L.markerClusterGroup({
+            disableClusteringAtZoom:10,
+            showCoverageOnHover:false,
+            spiderfyOnMaxZoom:false, 
+            spiderLegPolylineOptions:{
+                weight:0, color:'#999', opacity:1
+                },
+            zoomToBoundsOnClick:true,
+            removeOutsideVisibleBounds:true
+            });
+           
+            console.log(query);
+           	$.getJSON(query, function(data){
+            
+            geojsonAll = L.geoJson(data, {
+            onEachFeature: function(feature, layer) {
+            
+            }
+            });
+
+            mAll.addLayer(geojsonAll);       
+            mAll.addTo(map);
+           	map._layersMaxZoom = 17
+
+            
+            map.on('zoomend', function(){
+            if (map.getZoom() > 8 && map.hasLayer(mAll)){
+                map.removeLayer(mAll);
+            }
+            if (map.getZoom() <= 8 &&  map.hasLayer(mAll)== false){
+                map.addLayer(mAll);
+            }
+            });
+            
+            mAgric.removeLayer(geojsonAgric);
+           	mEdu.removeLayer(geojsonEdu);
+            mFin.removeLayer(geojsonFin);
+            mHea.removeLayer(geojsonHea);
+            mNut.removeLayer(geojsonNut);
+           	mRes.removeLayer(geojsonRes);
+           	mSta.removeLayer(geojsonSta);
+           	mNat.removeLayer(geojsonNat);
+
+            });
+	  }
+	  
+	  
+	}	  
+	$('.button').click(function() {
+	  $(this).addClass('selected');
+	  LayerActions[$(this).attr('id')](sublayers[0]);
+	});
+
+$('.button.alll').addClass('selected');
+
+
+
+	var removelayer = "";
+	var agric_layer = false;
+	var education_layer = false;
+	var finance_layer = false;
+	var health_layer = false;
+	var nutrition_layer = false;
+	var research_layer = false;
+	var state_layer = false;
+	var national_layer = false;
+	var all_layer = true;
+	
+	
+
+var checkclick = function() {
+   if (agric_layer == true){
+   removelayer = "agric";     
+  }
+  
+  if (education_layer == true){
+   removelayer = "education";   
+  }
+  
+  if (finance_layer == true){
+   removelayer = "finance";   
+  }
+  
+  if (health_layer == true){
+   removelayer = "health";   
+  }
+  
+  if (nutrition_layer == true){
+   removelayer = "nutrition";   
+  }
+  
+  if (research_layer == true){
+   removelayer = "research";   
+  }
+  
+  if (state_layer == true){
+   removelayer = "state";   
+  }
+
+  if (national_layer == true){
+   removelayer = "national";   
+  }
+  
+  if (all_layer == true){
+   removelayer = "all";   
+  }
+
+  
+};
+$('.button').bind( "click", checkclick );
+
+	
+  }
+  </script>
+
+
+</head>
+<body onload="init()">
+
+
+<td width="" height="100%">	 
+
+ 
+	  <div id='map'></div>
+	 
+	  
+ 	  <div id='menu'>
+	  
+ 
+ 	  
+
+ 	 
+	  <div id="project_title"><b><font size="4">Project Scope</font></b></div>
+		<a href="#national" id="national" class="button national"><b><font color="#000000">National</font></b></a> 
+		<a href="#state" id="state" class="button state"><b><font color="#000000">State</font></b></a> 
+
+ 	  <div id="sector_title"><font size="4">Sector</font></div> 		 
+		<a href="#agric" id="agric" class="button agric"><font color="#000000">Agriculture</font></a> 
+		<a href="#education" id="education" class="button education"><font color="#000000">Education</font></a> 
+		<a href="#finance" id="finance" class="button finance"><font color="#000000">Finance</font></a> 
+		<a href="#health" id="health" class="button health"><font color="#000000">Health</font></a> 
+		<a href="#nutrition" id="nutrition" class="button nutrition"><font color="#000000">Nutrition</font></a> 
+		<a href="#research" id="research" class="button research"><font color="#000000">Research</font></a> 
+		<a href="#all" id="alll" class="button all"><font color="#000000">All</font></a> 
+
+		
+	<a id=download href="http://ehealthafrica.cartodb.com/api/v2/sql?format=csv&q=SELECT+cartodb_id, the_geom_webmercator, state, scope_of_work, duration, bmgf_point, amount_us, grantee_organisation, beneficiary, title_of_grant, nature_of_work, focal_state, longitude, latitude, sector, organisation+FROM+granteedata_copy" target="_blank">Download CSV</a>
+
+	  </div>
+</td>	  
+	  
+    	  
+	</td>
+  </tr>
+</table>
+
+</body>
+</html>
